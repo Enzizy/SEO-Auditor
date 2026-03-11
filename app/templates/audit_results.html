@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="space-y-8">
+    <div class="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-panel xl:flex-row xl:items-center xl:justify-between">
+      <div>
+        <p class="text-sm text-slate-500">Audits / <span class="font-medium text-slate-900">Audit Results</span></p>
+        <h2 class="mt-3 font-display text-3xl text-ink">{{ audit.website.label }}</h2>
+        <p class="mt-2 text-sm text-slate-500">{{ audit.start_url }}</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="/audits/{{ audit.id }}/reports?format=html" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Open HTML</a>
+        <a href="/audits/{{ audit.id }}/reports?format=pdf" class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Download PDF</a>
+        <a href="/audits/new" class="rounded-2xl bg-brand px-4 py-2 text-sm font-semibold text-white">New Audit</a>
+      </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">SEO Score</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.seo_score or 0 }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Performance Score</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.performance_score or 0 }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Pages Crawled</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.pages_crawled }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Total Issues</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.total_issues }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Broken Links</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.broken_links }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Missing Meta Descriptions</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.missing_meta_descriptions }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+        <p class="text-sm text-slate-500">Missing ALT Images</p>
+        <p class="mt-3 font-display text-4xl text-ink">{{ audit.missing_alt_images }}</p>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-5 text-white shadow-panel">
+        <p class="text-sm text-slate-300">Reports</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a href="/audits/{{ audit.id }}/reports?format=html" class="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold">HTML</a>
+          <a href="/audits/{{ audit.id }}/reports?format=csv" class="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold">CSV</a>
+          <a href="/audits/{{ audit.id }}/reports?format=pdf" class="rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold">PDF</a>
+        </div>
+      </article>
+    </div>
+
+    {% set tabs = ['overview', 'pages', 'issues', 'images', 'performance', 'reports'] %}
+    <div class="flex flex-wrap gap-2">
+      {% for item in tabs %}
+        <a href="/audits/{{ audit.id }}?tab={{ item }}"
+           class="rounded-full px-4 py-2 text-sm font-semibold {{ 'bg-slate-900 text-white' if tab == item else 'bg-white text-slate-600 border border-slate-200' }}">
+          {{ item|title }}
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if tab == 'overview' %}
+      <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="font-display text-xl text-ink">Audit summary</h2>
+          <dl class="mt-6 grid gap-4 md:grid-cols-2">
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">Project</dt>
+              <dd class="mt-2 text-sm font-semibold text-slate-900">{{ audit.website.label }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">Start URL</dt>
+              <dd class="mt-2 break-all text-sm font-semibold text-slate-900">{{ audit.start_url }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">PageSpeed Strategy</dt>
+              <dd class="mt-2 text-sm font-semibold capitalize text-slate-900">{{ audit.pagespeed_strategy }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">Crawl Limits</dt>
+              <dd class="mt-2 text-sm font-semibold text-slate-900">{{ audit.max_pages }} pages / depth {{ audit.max_depth }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">Total Runtime</dt>
+              <dd class="mt-2 text-sm font-semibold text-slate-900">{{ phase_timings.total }}</dd>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-4">
+              <dt class="text-sm text-slate-500">Worker Status</dt>
+              <dd class="mt-2 text-sm font-semibold capitalize text-slate-900">{{ audit.progress_stage or audit.status.value }}</dd>
+            </div>
+          </dl>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-rose-200 bg-rose-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-[0.2em] text-rose-600">Critical</p>
+              <p class="mt-2 font-display text-3xl text-rose-700">{{ issue_breakdown.critical }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">Warnings</p>
+              <p class="mt-2 font-display text-3xl text-amber-700">{{ issue_breakdown.warning }}</p>
+            </div>
+            <div class="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+              <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Info</p>
+              <p class="mt-2 font-display text-3xl text-sky-700">{{ issue_breakdown.info }}</p>
+            </div>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl border border-slate-200 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Crawl</p>
+              <p class="mt-2 font-display text-2xl text-ink">{{ phase_timings.crawl }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Analysis</p>
+              <p class="mt-2 font-display text-2xl text-ink">{{ phase_timings.analysis }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Reporting</p>
+              <p class="mt-2 font-display text-2xl text-ink">{{ phase_timings.reporting }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h2 class="font-display text-xl text-ink">Next recommended actions</h2>
+          <div class="mt-4 space-y-3">
+            {% for issue in issues[:8] %}
+              <article class="rounded-2xl border border-slate-200 p-4">
+                <div class="flex items-center justify-between gap-4">
+                  <p class="font-medium text-slate-900">{{ issue.message }}</p>
+                  <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ severity_class(issue.severity.value) }}">{{ issue.severity.value }}</span>
+                </div>
+                <p class="mt-2 text-sm text-slate-600">{{ issue.recommendation }}</p>
+              </article>
+            {% else %}
+              <p class="text-sm text-slate-500">No issues were recorded for this audit run.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <div>
+          <h2 class="font-display text-xl text-ink">Most frequent issue types</h2>
+          <p class="text-sm text-slate-500">Prioritize recurring template-level problems before one-off fixes.</p>
+        </div>
+        <div class="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {% for issue_type, count in issue_type_summary %}
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p class="text-sm font-medium text-slate-900">{{ issue_type|replace('_', ' ')|title }}</p>
+              <p class="mt-3 font-display text-3xl text-ink">{{ count }}</p>
+            </article>
+          {% else %}
+            <p class="text-sm text-slate-500">No issue summary is available for this run.</p>
+          {% endfor %}
+        </div>
+      </section>
+    {% elif tab == 'pages' %}
+      <section class="rounded-3xl border border-slate-200 bg-white shadow-panel">
+        <div class="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 class="font-display text-xl text-ink">Page results</h2>
+            <p class="text-sm text-slate-500">Filter by URL fragment to focus on a specific section of the site.</p>
+          </div>
+          <form method="get" class="flex items-center gap-3">
+            <input type="hidden" name="tab" value="pages" />
+            <input type="text" name="page_query" value="{{ page_query or '' }}" placeholder="/services"
+                   class="rounded-2xl border-slate-300 bg-slate-50 px-4 py-2 text-sm shadow-sm focus:border-brand focus:ring-brand" />
+            <button class="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Filter</button>
+          </form>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th class="px-6 py-3 font-medium">URL</th>
+                <th class="px-6 py-3 font-medium">Status</th>
+                <th class="px-6 py-3 font-medium">Title</th>
+                <th class="px-6 py-3 font-medium">H1</th>
+                <th class="px-6 py-3 font-medium">Issues</th>
+                <th class="px-6 py-3 font-medium">PageSpeed</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for page in page_results %}
+                <tr>
+                  <td class="px-6 py-4 font-medium text-slate-900">{{ page.url }}</td>
+                  <td class="px-6 py-4">{{ page.status_code or '-' }}</td>
+                  <td class="px-6 py-4">{{ page.title or 'Missing title' }}</td>
+                  <td class="px-6 py-4">{{ page.h1_count }}</td>
+                  <td class="px-6 py-4">{{ page.issues_count }}</td>
+                  <td class="px-6 py-4">{{ page.pagespeed_score or '-' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="px-6 py-10 text-center text-slate-500">No page results match the current filter.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% elif tab == 'issues' %}
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 class="font-display text-xl text-ink">Issues</h2>
+            <p class="text-sm text-slate-500">Review severity and drill into recommendations.</p>
+          </div>
+          <form method="get" class="flex items-center gap-3">
+            <input type="hidden" name="tab" value="issues" />
+            <select name="issue_severity" class="rounded-2xl border-slate-300 bg-slate-50 px-4 py-2 text-sm shadow-sm focus:border-brand focus:ring-brand">
+              <option value="">All severities</option>
+              <option value="critical" {{ 'selected' if issue_severity == 'critical' else '' }}>Critical</option>
+              <option value="warning" {{ 'selected' if issue_severity == 'warning' else '' }}>Warning</option>
+              <option value="info" {{ 'selected' if issue_severity == 'info' else '' }}>Info</option>
+            </select>
+            <button class="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Apply</button>
+          </form>
+        </div>
+        <div class="mt-6 space-y-4">
+          {% for issue in issues %}
+            <article class="rounded-2xl border border-slate-200 p-5">
+              <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <div class="flex items-center gap-3">
+                    <h3 class="font-medium text-slate-900">{{ issue.issue_type|replace('_', ' ')|title }}</h3>
+                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ severity_class(issue.severity.value) }}">{{ issue.severity.value }}</span>
+                  </div>
+                  <p class="mt-2 text-sm text-slate-700">{{ issue.message }}</p>
+                  <p class="mt-2 text-sm text-slate-500">{{ issue.recommendation }}</p>
+                </div>
+                {% if issue.page_result %}
+                  <p class="max-w-md text-xs text-slate-500">{{ issue.page_result.url }}</p>
+                {% endif %}
+              </div>
+            </article>
+          {% else %}
+            <p class="text-sm text-slate-500">No issues match the current filter.</p>
+          {% endfor %}
+        </div>
+      </section>
+    {% elif tab == 'images' %}
+      <section class="rounded-3xl border border-slate-200 bg-white shadow-panel">
+        <div class="border-b border-slate-200 px-6 py-5">
+          <h2 class="font-display text-xl text-ink">Image findings</h2>
+          <p class="text-sm text-slate-500">Large images, missing dimensions, and non-WebP assets found during crawl.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th class="px-6 py-3 font-medium">Image URL</th>
+                <th class="px-6 py-3 font-medium">Format</th>
+                <th class="px-6 py-3 font-medium">Size</th>
+                <th class="px-6 py-3 font-medium">Dimensions</th>
+                <th class="px-6 py-3 font-medium">Optimized</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for asset in image_assets %}
+                <tr>
+                  <td class="px-6 py-4">{{ asset.asset_url }}</td>
+                  <td class="px-6 py-4">{{ asset.format or '-' }}</td>
+                  <td class="px-6 py-4">{{ asset.size_bytes or '-' }}</td>
+                  <td class="px-6 py-4">{{ asset.width or '?' }} x {{ asset.height or '?' }}</td>
+                  <td class="px-6 py-4">{{ 'Yes' if asset.is_optimized else 'No' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">No image assets were captured.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% elif tab == 'performance' %}
+      <section class="rounded-3xl border border-slate-200 bg-white shadow-panel">
+        <div class="border-b border-slate-200 px-6 py-5">
+          <h2 class="font-display text-xl text-ink">Performance assets</h2>
+          <p class="text-sm text-slate-500">Asset-level performance signals gathered from crawl inspection and PageSpeed.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-slate-500">
+              <tr>
+                <th class="px-6 py-3 font-medium">Asset URL</th>
+                <th class="px-6 py-3 font-medium">Type</th>
+                <th class="px-6 py-3 font-medium">Format</th>
+                <th class="px-6 py-3 font-medium">Size</th>
+                <th class="px-6 py-3 font-medium">Optimized</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for asset in performance_assets %}
+                <tr>
+                  <td class="px-6 py-4">{{ asset.asset_url }}</td>
+                  <td class="px-6 py-4">{{ asset.asset_type }}</td>
+                  <td class="px-6 py-4">{{ asset.format or '-' }}</td>
+                  <td class="px-6 py-4">{{ asset.size_bytes or '-' }}</td>
+                  <td class="px-6 py-4">{{ 'Yes' if asset.is_optimized else 'No' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">No performance assets were captured.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    {% else %}
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <h2 class="font-display text-xl text-ink">Download reports</h2>
+        <div class="mt-6 grid gap-4 md:grid-cols-3">
+          <a href="/audits/{{ audit.id }}/reports?format=html" class="rounded-2xl border border-slate-200 p-5 transition hover:border-brand hover:bg-mist">
+            <p class="font-medium text-slate-900">HTML report</p>
+            <p class="mt-2 text-sm text-slate-500">Open the styled audit report in-browser.</p>
+          </a>
+          <a href="/audits/{{ audit.id }}/reports?format=csv" class="rounded-2xl border border-slate-200 p-5 transition hover:border-brand hover:bg-mist">
+            <p class="font-medium text-slate-900">CSV export</p>
+            <p class="mt-2 text-sm text-slate-500">Export page-level results to a spreadsheet-friendly format.</p>
+          </a>
+          <a href="/audits/{{ audit.id }}/reports?format=pdf" class="rounded-2xl border border-slate-200 p-5 transition hover:border-brand hover:bg-mist">
+            <p class="font-medium text-slate-900">PDF report</p>
+            <p class="mt-2 text-sm text-slate-500">Download a presentation-ready version for client delivery.</p>
+          </a>
+        </div>
+      </section>
+    {% endif %}
+  </section>
+{% endblock %}

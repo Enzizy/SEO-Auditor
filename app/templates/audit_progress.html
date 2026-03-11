@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section
+    x-data="auditProgress({{ audit.id }}, {{ audit.status.value|tojson }}, {{ (audit.progress_stage or '')|tojson }}, {{ (audit.progress_message or '')|tojson }}, {{ audit.pages_crawled or 0 }}, {{ audit.total_issues or 0 }})"
+    x-init="start()"
+    class="space-y-6"
+  >
+    <div class="flex flex-col gap-4 xl:flex-row">
+      <div class="flex-1 rounded-3xl border border-slate-200 bg-white p-8 shadow-panel">
+        <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div>
+            <p class="text-sm text-slate-500">Audits / <span class="font-medium text-slate-900">Audit Progress</span></p>
+            <p class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Audit In Progress</p>
+            <h2 class="mt-2 font-display text-3xl text-ink">{{ audit.website.label }}</h2>
+            <p class="mt-2 text-sm text-slate-500">{{ audit.start_url }}</p>
+          </div>
+          <div class="rounded-2xl bg-slate-900 px-4 py-3 text-white">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Status</p>
+            <p class="mt-1 text-lg font-semibold capitalize" x-text="status"></p>
+          </div>
+        </div>
+
+        <div class="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-slate-700">Estimated progress</p>
+            <p class="text-sm text-slate-500" x-text="progressLabel()"></p>
+          </div>
+          <div class="mt-3 h-3 overflow-hidden rounded-full bg-slate-200">
+            <div class="h-full rounded-full bg-brand transition-all duration-500" :style="`width: ${progressPercent()}%`"></div>
+          </div>
+          <div class="mt-6 grid gap-4 md:grid-cols-3">
+            <div class="rounded-2xl bg-white p-4 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Pages Crawled</p>
+              <p class="mt-2 font-display text-3xl text-ink" x-text="pagesCrawled"></p>
+            </div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Issues Found</p>
+              <p class="mt-2 font-display text-3xl text-ink" x-text="issuesFound"></p>
+            </div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Current Stage</p>
+              <p class="mt-2 text-sm font-semibold uppercase tracking-[0.12em] text-brand" x-text="stage || 'initializing'"></p>
+            </div>
+            <div class="rounded-2xl bg-white p-4 shadow-sm">
+              <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Current Page</p>
+              <p class="mt-2 line-clamp-2 text-sm text-slate-700" x-text="currentPage || 'Preparing crawl...'"></p>
+            </div>
+          </div>
+          <div class="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-400">Activity Message</p>
+            <p class="mt-2 text-sm text-slate-700" x-text="progressMessage || 'Waiting for audit updates...'"></p>
+          </div>
+        </div>
+
+        <template x-if="errorMessage">
+          <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700" x-text="errorMessage"></div>
+        </template>
+      </div>
+
+      <aside class="w-full xl:max-w-sm">
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+          <h3 class="font-display text-xl text-ink">Live crawl stream</h3>
+          <div class="mt-4 space-y-3 text-sm text-slate-600">
+            <div class="rounded-2xl border p-4 transition"
+                 :class="phaseCardClass(['initializing', 'crawling'])">
+              <p class="font-medium text-slate-900">Crawling pages</p>
+              <p class="mt-1">Collecting same-domain URLs and normalizing duplicates.</p>
+            </div>
+            <div class="rounded-2xl border p-4 transition"
+                 :class="phaseCardClass(['performance', 'persisting'])">
+              <p class="font-medium text-slate-900">Analyzing metadata</p>
+              <p class="mt-1">Checking title tags, descriptions, H1s, images, and assets.</p>
+            </div>
+            <div class="rounded-2xl border p-4 transition"
+                 :class="phaseCardClass(['reporting', 'completed'])">
+              <p class="font-medium text-slate-900">Generating reports</p>
+              <p class="mt-1">Preparing HTML, CSV, and PDF outputs for download.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+    function auditProgress(auditId, initialStatus, initialStage, initialMessage, initialPages, initialIssues) {
+      return {
+        status: initialStatus,
+        stage: initialStage,
+        progressMessage: initialMessage,
+        pagesCrawled: initialPages,
+        issuesFound: initialIssues,
+        currentPage: null,
+        errorMessage: null,
+        intervalId: null,
+        start() {
+          this.poll();
+          this.intervalId = setInterval(() => this.poll(), 2500);
+        },
+        progressPercent() {
+          const pages = Number(this.pagesCrawled || 0);
+          return Math.min(94, pages * 8 + (this.status === 'completed' ? 100 : 10));
+        },
+        phaseCardClass(phases) {
+          if (this.status === 'failed' && phases.includes(this.stage)) {
+            return 'border-rose-200 bg-rose-50';
+          }
+          if (phases.includes(this.stage)) {
+            return 'border-brand bg-mist shadow-sm';
+          }
+          if (this.status === 'completed') {
+            return 'border-emerald-200 bg-emerald-50';
+          }
+          return 'border-slate-200 bg-slate-50';
+        },
+        progressLabel() {
+          if (this.status === 'completed') return 'Complete';
+          if (this.status === 'failed') return 'Failed';
+          return `${this.pagesCrawled} pages processed`;
+        },
+        async poll() {
+          const response = await fetch(`/audits/${auditId}/status`, { headers: { 'Accept': 'application/json' } });
+          if (!response.ok) return;
+          const data = await response.json();
+          this.status = data.status;
+          this.stage = data.progress_stage;
+          this.progressMessage = data.progress_message;
+          this.pagesCrawled = data.pages_crawled;
+          this.issuesFound = data.total_issues;
+          this.currentPage = data.current_page_url;
+          this.errorMessage = data.error_message;
+          if (data.status === 'completed' || data.status === 'failed') {
+            clearInterval(this.intervalId);
+            window.location.href = `/audits/${auditId}`;
+          }
+        }
+      }
+    }
+  </script>
+{% endblock %}

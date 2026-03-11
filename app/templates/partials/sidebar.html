@@ -1,0 +1,44 @@
+<aside class="border-r border-slate-200/80 bg-white lg:w-72">
+  <div class="flex h-full flex-col">
+    <div class="border-b border-slate-200/80 px-6 py-6">
+      <a href="/dashboard" class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-mist text-brand shadow-panel">
+          <span class="font-display text-lg font-bold">SA</span>
+        </div>
+        <div>
+          <p class="font-display text-lg font-semibold text-ink">Joyno SEO Auditor Tool</p>
+          <p class="text-sm text-slate-500">Technical audits for client sites</p>
+        </div>
+      </a>
+    </div>
+    <nav class="flex-1 px-4 py-6">
+      {% set nav_items = [
+        ('dashboard', 'Dashboard', '/dashboard'),
+        ('new_audit', 'New Audit', '/audits/new'),
+        ('history', 'Audit History', '/history'),
+        ('reports', 'Reports', '/reports')
+      ] %}
+      <ul class="space-y-2">
+        {% for item_key, label, href in nav_items %}
+          <li>
+            <a href="{{ href }}"
+               class="flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-medium transition {{ 'bg-slate-900 text-white shadow-panel' if active_nav == item_key else 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+              <span>{{ label }}</span>
+              {% if active_nav == item_key %}
+                <span class="h-2 w-2 rounded-full bg-teal-300"></span>
+              {% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <div class="m-4 rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-50 to-white p-5">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Practical Defaults</p>
+      <ul class="mt-3 space-y-2 text-sm text-slate-600">
+        <li>Same-domain crawling</li>
+        <li>Safe page limits for V1</li>
+        <li>Homepage PageSpeed integration</li>
+      </ul>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Total Audits</p>
+      <p class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Current Volume</p>
+      <p class="mt-3 font-display text-4xl text-ink">{{ total_audits }}</p>
+    </article>
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Websites Tracked</p>
+      <p class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Portfolio</p>
+      <p class="mt-3 font-display text-4xl text-ink">{{ websites_tracked }}</p>
+    </article>
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Average SEO Score</p>
+      <p class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Tracked Trend</p>
+      <p class="mt-3 font-display text-4xl text-ink">{{ average_seo_score }}</p>
+    </article>
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Average Performance Score</p>
+      <p class="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Stability</p>
+      <p class="mt-3 font-display text-4xl text-ink">{{ average_performance_score }}</p>
+    </article>
+  </section>
+
+  <section class="mt-4 grid gap-4 lg:grid-cols-3">
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Completed Audits</p>
+      <p class="mt-3 font-display text-3xl text-ink">{{ completed_audits }}</p>
+    </article>
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Queued or Running</p>
+      <p class="mt-3 font-display text-3xl text-ink">{{ running_audits }}</p>
+    </article>
+    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-panel">
+      <p class="text-sm text-slate-500">Critical Issues Logged</p>
+      <p class="mt-3 font-display text-3xl text-ink">{{ critical_issues }}</p>
+    </article>
+  </section>
+
+  <section class="mt-8 grid gap-6 xl:grid-cols-[1.7fr_0.9fr]">
+    <div class="rounded-3xl border border-slate-200 bg-white shadow-panel">
+      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+        <div>
+          <h2 class="font-display text-xl text-ink">Recent Audits</h2>
+          <p class="text-sm text-slate-500">Latest crawl activity across tracked projects.</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-sm font-semibold text-slate-500">Export CSV</span>
+          <a href="/history" class="text-sm font-semibold text-brand">View All</a>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-left text-slate-500">
+            <tr>
+              <th class="px-6 py-3 font-medium">Project</th>
+              <th class="px-6 py-3 font-medium">Status</th>
+              <th class="px-6 py-3 font-medium">SEO</th>
+              <th class="px-6 py-3 font-medium">Performance</th>
+              <th class="px-6 py-3 font-medium">Pages</th>
+              <th class="px-6 py-3 font-medium"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for audit in recent_audits %}
+              <tr class="hover:bg-slate-50/80">
+                <td class="px-6 py-4">
+                  <p class="font-medium text-slate-900">{{ audit.website.label }}</p>
+                  <p class="text-slate-500">{{ audit.start_url }}</p>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="rounded-full px-3 py-1 text-xs font-semibold {{ status_class(audit.status.value) }}">{{ audit.status.value }}</span>
+                </td>
+                <td class="px-6 py-4">{{ audit.seo_score or '-' }}</td>
+                <td class="px-6 py-4">{{ audit.performance_score or '-' }}</td>
+                <td class="px-6 py-4">{{ audit.pages_crawled }}</td>
+                <td class="px-6 py-4 text-right">
+                  <a href="/audits/{{ audit.id }}" class="font-semibold text-brand">View</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="px-6 py-12 text-center text-slate-500">No audits yet. Start your first crawl.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <aside class="space-y-6">
+      <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-brand">Workflow</p>
+        <h2 class="mt-3 font-display text-2xl text-ink">Audit a live client site in minutes.</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Queue a crawl, inspect issues by severity, review PageSpeed findings, and export a client-friendly report pack.
+        </p>
+        <a href="/audits/new" class="mt-5 inline-flex rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Start New Audit</a>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <h3 class="font-display text-lg text-ink">Version 1 Coverage</h3>
+        <ul class="mt-4 space-y-3 text-sm text-slate-600">
+          <li>SEO metadata and heading checks</li>
+          <li>Broken link detection</li>
+          <li>Image and asset optimization flags</li>
+          <li>Homepage PageSpeed Insights score</li>
+        </ul>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <h3 class="font-display text-lg text-ink">How To Use It</h3>
+        <ol class="mt-4 space-y-3 text-sm text-slate-600">
+          <li>1. Start a new audit with safe crawl limits.</li>
+          <li>2. Watch progress for crawl depth and issue count.</li>
+          <li>3. Review results by pages, issues, images, and reports.</li>
+        </ol>
+      </article>
+    </aside>
+  </section>
+{% endblock %}

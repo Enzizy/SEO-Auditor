@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+    <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-panel">
+      <div class="max-w-2xl">
+        <p class="text-sm text-slate-500">Audits / <span class="font-medium text-slate-900">New Audit</span></p>
+        <p class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-brand">Start New Website Audit</p>
+        <h2 class="mt-2 font-display text-3xl text-ink">Configure a focused SEO audit</h2>
+        <p class="mt-3 text-sm leading-6 text-slate-600">
+          Version 1 keeps scans safe by default while still surfacing practical fixes for WordPress, Elementor, and client brochure sites.
+        </p>
+      </div>
+
+      <form action="/audits" method="post" class="mt-8 space-y-6">
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <div class="mb-5 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-sm">🌐</div>
+            <div>
+              <h3 class="font-display text-xl text-ink">Site Configuration</h3>
+              <p class="text-sm text-slate-500">Choose the domain and label for this audit run.</p>
+            </div>
+          </div>
+          <div class="grid gap-6 md:grid-cols-2">
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Website URL</span>
+              <input name="website_url" type="url" required value="{{ values.website_url or '' }}" placeholder="https://example.com"
+                     class="mt-2 block w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand focus:ring-brand" />
+              {% if errors.website_url %}<span class="mt-2 block text-sm text-rose-600">{{ errors.website_url }}</span>{% endif %}
+            </label>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Project Label</span>
+              <input name="project_label" type="text" required value="{{ values.project_label or '' }}" placeholder="Client site"
+                     class="mt-2 block w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand focus:ring-brand" />
+              {% if errors.project_label %}<span class="mt-2 block text-sm text-rose-600">{{ errors.project_label }}</span>{% endif %}
+            </label>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <div class="mb-5 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-sm">⚙</div>
+            <div>
+              <h3 class="font-display text-xl text-ink">Crawler Settings</h3>
+              <p class="text-sm text-slate-500">Set crawl scope and homepage performance mode.</p>
+            </div>
+          </div>
+          <div class="grid gap-6 md:grid-cols-2">
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Max Pages to Crawl</span>
+              <input name="max_pages" type="number" min="1" max="100" value="{{ values.max_pages or defaults.max_pages }}"
+                     class="mt-2 block w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand focus:ring-brand" />
+            </label>
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700">Crawl Depth</span>
+              <input name="max_depth" type="number" min="0" max="5" value="{{ values.max_depth or defaults.max_depth }}"
+                     class="mt-2 block w-full rounded-2xl border-slate-300 bg-white px-4 py-3 text-sm shadow-sm focus:border-brand focus:ring-brand" />
+            </label>
+          </div>
+
+          {% set current_strategy = values.pagespeed_strategy or defaults.pagespeed_strategy %}
+          {% set current_js_mode = values.js_render_mode or defaults.js_render_mode %}
+          <div class="mt-6 grid gap-6 md:grid-cols-2">
+            <div>
+              <span class="text-sm font-medium text-slate-700">PageSpeed Mode</span>
+              <div class="mt-2 grid grid-cols-2 gap-3">
+                <label class="rounded-2xl border px-4 py-3 text-sm font-medium {{ 'border-brand bg-white text-brand' if current_strategy == 'mobile' else 'border-slate-200 bg-white text-slate-600' }}">
+                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="mobile" {{ 'checked' if current_strategy == 'mobile' else '' }}>
+                  Mobile
+                </label>
+                <label class="rounded-2xl border px-4 py-3 text-sm font-medium {{ 'border-brand bg-white text-brand' if current_strategy == 'desktop' else 'border-slate-200 bg-white text-slate-600' }}">
+                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="desktop" {{ 'checked' if current_strategy == 'desktop' else '' }}>
+                  Desktop
+                </label>
+              </div>
+            </div>
+            <div>
+              <span class="text-sm font-medium text-slate-700">JS Rendering Mode</span>
+              <div class="mt-2 grid grid-cols-3 gap-3">
+                {% for mode in ['off', 'auto', 'on'] %}
+                  <label class="rounded-2xl border px-4 py-3 text-center text-sm font-medium {{ 'border-brand bg-white text-brand' if current_js_mode == mode else 'border-slate-200 bg-white text-slate-600' }}">
+                    <input class="sr-only" type="radio" name="js_render_mode" value="{{ mode }}" {{ 'checked' if current_js_mode == mode else '' }}>
+                    {{ mode|title if mode != 'on' else 'Always' }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+          <div class="mb-5 flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-sm">⋯</div>
+            <div>
+              <h3 class="font-display text-xl text-ink">Advanced</h3>
+              <p class="text-sm text-slate-500">Optional checks that affect runtime and crawl breadth.</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <label class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+              <input name="external_link_check" type="checkbox" value="true"
+                     {{ 'checked' if values.external_link_check is sameas true or (not values and defaults.external_link_check) else '' }}
+                     class="mt-1 rounded border-slate-300 text-brand focus:ring-brand" />
+              <span>
+                <span class="block text-sm font-medium text-slate-800">External Links</span>
+                <span class="block text-sm text-slate-500">Validate outbound URLs in addition to internal links.</span>
+              </span>
+            </label>
+            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+              <p class="text-sm font-medium text-slate-800">Image Analysis</p>
+              <p class="mt-1 text-sm text-slate-500">ALT text, image sizes, dimensions, format checks, and compression opportunities are enabled for all crawls in V1.</p>
+            </div>
+          </div>
+        </section>
+
+        <div class="flex flex-col gap-4 rounded-3xl bg-slate-900 px-5 py-5 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <p class="text-sm font-semibold">Start Audit</p>
+            <p class="mt-1 text-sm text-slate-300">Estimated time: ~15 minutes based on settings</p>
+          </div>
+          <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-panel transition hover:bg-teal-700">
+            Start Audit
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="space-y-6">
+      <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-panel">
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-mist text-brand">i</div>
+          <div>
+            <h3 class="font-display text-xl text-ink">Crawler Runtime</h3>
+            <p class="text-sm text-slate-500">Safe defaults for the first version.</p>
+          </div>
+        </div>
+        <ul class="mt-4 space-y-3 text-sm text-slate-600">
+          <li>Start with 25 pages and depth 2 for typical brochure sites.</li>
+          <li>Use `auto` JS rendering for Elementor-heavy pages without forcing every request through a browser.</li>
+          <li>Run mobile PageSpeed first to surface the more restrictive performance baseline.</li>
+        </ul>
+      </article>
+      <article class="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-slate-100 shadow-panel">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">Real-Time Visualization</p>
+        <h3 class="mt-3 font-display text-xl text-white">Audit telemetry appears on the progress screen.</h3>
+        <ul class="mt-4 space-y-2 text-sm text-slate-300">
+          <li>Current page and crawl count</li>
+          <li>Issue totals as the job runs</li>
+          <li>Metadata and heading structure</li>
+          <li>ALT text, image format, dimensions</li>
+          <li>Broken links and oversized JS/CSS</li>
+        </ul>
+      </article>
+    </aside>
+  </section>
+{% endblock %}

@@ -1,0 +1,103 @@
+services:
+  - type: web
+    name: joyno-seo-auditor-tool-web
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/bash ./scripts/start_web.sh
+    healthCheckPath: /api/health
+    envVars:
+      - fromGroup: joyno-seo-auditor-tool-shared
+      - key: SEO_AUDITOR_APP_ENV
+        value: production
+      - key: SEO_AUDITOR_DEBUG
+        value: "false"
+      - key: SEO_AUDITOR_APP_NAME
+        value: Joyno SEO Auditor Tool
+      - key: SEO_AUDITOR_BASE_URL
+        sync: false
+      - key: SEO_AUDITOR_DATABASE_URL
+        fromDatabase:
+          name: joyno-seo-auditor-tool-db
+          property: connectionString
+      - key: SEO_AUDITOR_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: joyno-seo-auditor-tool-redis
+          property: connectionString
+      - key: SEO_AUDITOR_RQ_QUEUE_NAME
+        value: seo-audits
+      - key: SEO_AUDITOR_EXECUTION_BACKEND
+        value: rq
+      - key: SEO_AUDITOR_STORAGE_BACKEND
+        value: s3
+      - key: SEO_AUDITOR_S3_BUCKET
+        sync: false
+      - key: SEO_AUDITOR_S3_REGION
+        sync: false
+      - key: SEO_AUDITOR_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: SEO_AUDITOR_PAGESPEED_API_KEY
+        sync: false
+
+  - type: worker
+    name: joyno-seo-auditor-tool-worker
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/bash ./scripts/start_worker.sh
+    envVars:
+      - fromGroup: joyno-seo-auditor-tool-shared
+      - key: SEO_AUDITOR_APP_ENV
+        value: production
+      - key: SEO_AUDITOR_DEBUG
+        value: "false"
+      - key: SEO_AUDITOR_APP_NAME
+        value: Joyno SEO Auditor Tool
+      - key: SEO_AUDITOR_BASE_URL
+        sync: false
+      - key: SEO_AUDITOR_DATABASE_URL
+        fromDatabase:
+          name: joyno-seo-auditor-tool-db
+          property: connectionString
+      - key: SEO_AUDITOR_REDIS_URL
+        fromService:
+          type: keyvalue
+          name: joyno-seo-auditor-tool-redis
+          property: connectionString
+      - key: SEO_AUDITOR_RQ_QUEUE_NAME
+        value: seo-audits
+      - key: SEO_AUDITOR_EXECUTION_BACKEND
+        value: rq
+      - key: SEO_AUDITOR_STORAGE_BACKEND
+        value: s3
+      - key: SEO_AUDITOR_S3_BUCKET
+        sync: false
+      - key: SEO_AUDITOR_S3_REGION
+        sync: false
+      - key: SEO_AUDITOR_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: SEO_AUDITOR_PAGESPEED_API_KEY
+        sync: false
+
+  - type: keyvalue
+    name: joyno-seo-auditor-tool-redis
+    ipAllowList: []
+    maxmemoryPolicy: allkeys-lru
+
+databases:
+  - name: joyno-seo-auditor-tool-db
+
+envVarGroups:
+  - name: joyno-seo-auditor-tool-shared
+    envVars:
+      - key: SEO_AUDITOR_SECRET_KEY
+        generateValue: true

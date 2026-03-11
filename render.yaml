@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: joyno-seo-auditor-tool
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/bash ./scripts/start_web.sh
+    healthCheckPath: /api/health
+    envVars:
+      - key: SEO_AUDITOR_APP_ENV
+        value: production
+      - key: SEO_AUDITOR_DEBUG
+        value: "false"
+      - key: SEO_AUDITOR_APP_NAME
+        value: Joyno SEO Auditor Tool
+      - key: SEO_AUDITOR_BASE_URL
+        sync: false
+      - key: SEO_AUDITOR_DATABASE_URL
+        value: sqlite:///./seo_auditor.db
+      - key: SEO_AUDITOR_EXECUTION_BACKEND
+        value: inline
+      - key: SEO_AUDITOR_STORAGE_BACKEND
+        value: local
+      - key: SEO_AUDITOR_REPORTS_DIR
+        value: reports
+      - key: SEO_AUDITOR_ALLOW_AUTO_CREATE_TABLES
+        value: "true"
+      - key: SEO_AUDITOR_SECRET_KEY
+        generateValue: true
+      - key: SEO_AUDITOR_PAGESPEED_API_KEY
+        sync: false
