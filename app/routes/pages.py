@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Form, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -27,6 +27,7 @@ from app.services.audits import (
     get_report_library,
     get_report_path,
 )
+from app.services.execution import start_inline_audit_run
 from app.services.report_storage import ReportStorage
 
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -105,6 +106,7 @@ def new_audit(request: Request):
 
 @router.post("/audits")
 def create_audit(
+    background_tasks: BackgroundTasks,
     request: Request,
     website_url: str = Form(...),
     project_label: str = Form(...),
@@ -157,7 +159,11 @@ def create_audit(
     with db_state.SessionLocal() as db:
         audit_run = create_audit_job(db, payload)
         enqueue_audit_run(db, audit_run)
-    return RedirectResponse(url=f"/audits/{audit_run.id}", status_code=303)
+        audit_id = audit_run.id
+        job_id = audit_run.job_id
+    if get_settings().execution_backend == "inline" and job_id:
+        background_tasks.add_task(start_inline_audit_run, audit_id, job_id)
+    return RedirectResponse(url=f"/audits/{audit_id}", status_code=303)
 
 
 @router.get("/audits/{audit_id}")

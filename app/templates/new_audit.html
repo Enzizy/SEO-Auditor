@@ -12,7 +12,9 @@
         </p>
       </div>
 
-      <form action="/audits" method="post" class="mt-8 space-y-6">
+      {% set current_strategy = values.pagespeed_strategy or defaults.pagespeed_strategy %}
+      {% set current_js_mode = values.js_render_mode or defaults.js_render_mode %}
+      <form action="/audits" method="post" class="mt-8 space-y-6" x-data="{ pagespeedStrategy: '{{ current_strategy }}', jsRenderMode: '{{ current_js_mode }}' }">
         <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
           <div class="mb-5 flex items-center gap-3">
             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-slate-700 shadow-sm">🌐</div>
@@ -58,18 +60,16 @@
             </label>
           </div>
 
-          {% set current_strategy = values.pagespeed_strategy or defaults.pagespeed_strategy %}
-          {% set current_js_mode = values.js_render_mode or defaults.js_render_mode %}
           <div class="mt-6 grid gap-6 md:grid-cols-2">
             <div>
               <span class="text-sm font-medium text-slate-700">PageSpeed Mode</span>
               <div class="mt-2 grid grid-cols-2 gap-3">
-                <label class="rounded-2xl border px-4 py-3 text-sm font-medium {{ 'border-brand bg-white text-brand' if current_strategy == 'mobile' else 'border-slate-200 bg-white text-slate-600' }}">
-                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="mobile" {{ 'checked' if current_strategy == 'mobile' else '' }}>
+                <label class="cursor-pointer rounded-2xl border px-4 py-3 text-sm font-medium transition" :class="pagespeedStrategy === 'mobile' ? 'border-brand bg-white text-brand shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'">
+                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="mobile" x-model="pagespeedStrategy" {{ 'checked' if current_strategy == 'mobile' else '' }}>
                   Mobile
                 </label>
-                <label class="rounded-2xl border px-4 py-3 text-sm font-medium {{ 'border-brand bg-white text-brand' if current_strategy == 'desktop' else 'border-slate-200 bg-white text-slate-600' }}">
-                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="desktop" {{ 'checked' if current_strategy == 'desktop' else '' }}>
+                <label class="cursor-pointer rounded-2xl border px-4 py-3 text-sm font-medium transition" :class="pagespeedStrategy === 'desktop' ? 'border-brand bg-white text-brand shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'">
+                  <input class="sr-only" type="radio" name="pagespeed_strategy" value="desktop" x-model="pagespeedStrategy" {{ 'checked' if current_strategy == 'desktop' else '' }}>
                   Desktop
                 </label>
               </div>
@@ -78,8 +78,8 @@
               <span class="text-sm font-medium text-slate-700">JS Rendering Mode</span>
               <div class="mt-2 grid grid-cols-3 gap-3">
                 {% for mode in ['off', 'auto', 'on'] %}
-                  <label class="rounded-2xl border px-4 py-3 text-center text-sm font-medium {{ 'border-brand bg-white text-brand' if current_js_mode == mode else 'border-slate-200 bg-white text-slate-600' }}">
-                    <input class="sr-only" type="radio" name="js_render_mode" value="{{ mode }}" {{ 'checked' if current_js_mode == mode else '' }}>
+                  <label class="cursor-pointer rounded-2xl border px-4 py-3 text-center text-sm font-medium transition" :class="jsRenderMode === '{{ mode }}' ? 'border-brand bg-white text-brand shadow-sm' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'">
+                    <input class="sr-only" type="radio" name="js_render_mode" value="{{ mode }}" x-model="jsRenderMode" {{ 'checked' if current_js_mode == mode else '' }}>
                     {{ mode|title if mode != 'on' else 'Always' }}
                   </label>
                 {% endfor %}

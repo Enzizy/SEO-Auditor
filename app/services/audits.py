@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.config import get_settings
 from app.models import AuditIssue, AuditRun, AuditStatus, IssueSeverity, PageAuditResult, WebsiteProject
 from app.schemas.audit import AuditCreateForm, AuditStatusPayload
-from app.services.execution import build_inline_job_id, dispatch_audit_run, start_inline_audit_run
+from app.services.execution import build_inline_job_id, dispatch_audit_run
 from app.services.projects import get_or_create_project
 
 
@@ -36,7 +36,6 @@ def enqueue_audit_run(db: Session, audit_run: AuditRun) -> AuditRun:
         audit_run.job_id = build_inline_job_id(audit_run.id)
         db.add(audit_run)
         db.commit()
-        start_inline_audit_run(audit_run.id, audit_run.job_id)
         db.refresh(audit_run)
         return audit_run
 
