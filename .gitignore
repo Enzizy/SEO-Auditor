@@ -5,9 +5,10 @@ __pycache__/
 htmlcov/
 .env
 reports/
+!app/templates/reports/
+!app/templates/reports/report.html
 *.pyc
 *.pyo
 *.pyd
 .DS_Store
 node_modules/
-
