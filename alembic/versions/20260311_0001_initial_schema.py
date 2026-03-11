@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("email", sa.String(length=255), nullable=False),
         sa.Column("password_hash", sa.String(length=255), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
     )
     op.create_index("ix_users_email", "users", ["email"], unique=True)
 
@@ -39,7 +39,7 @@ def upgrade() -> None:
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("domain", sa.String(length=255), nullable=False),
         sa.Column("label", sa.String(length=255), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
     )
     op.create_index("ix_website_projects_user_id", "website_projects", ["user_id"], unique=False)
@@ -53,7 +53,7 @@ def upgrade() -> None:
         sa.Column("status", audit_status, nullable=False),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("completed_at", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.Column("pages_crawled", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("seo_score", sa.Float(), nullable=True),
         sa.Column("performance_score", sa.Float(), nullable=True),
@@ -95,7 +95,7 @@ def upgrade() -> None:
         sa.Column("pagespeed_score", sa.Float(), nullable=True),
         sa.Column("issues_count", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("missing_alt_count", sa.Integer(), nullable=False, server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.ForeignKeyConstraint(["audit_run_id"], ["audit_runs.id"], ondelete="CASCADE"),
     )
     op.create_index("ix_page_audit_results_audit_run_id", "page_audit_results", ["audit_run_id"], unique=False)
@@ -110,7 +110,7 @@ def upgrade() -> None:
         sa.Column("severity", issue_severity, nullable=False),
         sa.Column("message", sa.Text(), nullable=False),
         sa.Column("recommendation", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.ForeignKeyConstraint(["audit_run_id"], ["audit_runs.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["page_result_id"], ["page_audit_results.id"], ondelete="SET NULL"),
     )
@@ -130,7 +130,7 @@ def upgrade() -> None:
         sa.Column("width", sa.Integer(), nullable=True),
         sa.Column("height", sa.Integer(), nullable=True),
         sa.Column("compression_suggestion", sa.String(length=255), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("CURRENT_TIMESTAMP"), nullable=False),
         sa.ForeignKeyConstraint(["page_result_id"], ["page_audit_results.id"], ondelete="CASCADE"),
     )
     op.create_index("ix_asset_records_page_result_id", "asset_records", ["page_result_id"], unique=False)

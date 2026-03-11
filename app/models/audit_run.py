@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -31,7 +31,7 @@ class AuditRun(Base):
     status: Mapped[AuditStatus] = mapped_column(SqlEnum(AuditStatus), default=AuditStatus.queued, index=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"), index=True)
     crawl_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     crawl_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     analysis_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

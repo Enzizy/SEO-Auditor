@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -31,9 +31,8 @@ class PageAuditResult(Base):
     pagespeed_score: Mapped[float | None] = mapped_column(Float)
     issues_count: Mapped[int] = mapped_column(Integer, default=0)
     missing_alt_count: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text("CURRENT_TIMESTAMP"))
 
     audit_run: Mapped["AuditRun"] = relationship(back_populates="page_results")
     issues: Mapped[list["AuditIssue"]] = relationship(back_populates="page_result")
     assets: Mapped[list["AssetRecord"]] = relationship(back_populates="page_result", cascade="all, delete-orphan")
-
