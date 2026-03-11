@@ -22,8 +22,12 @@ def dispatch_audit_run(audit_run_id: int) -> str:
     raise ValueError(f"Unsupported execution backend: {settings.execution_backend}")
 
 
-def start_inline_audit_run(audit_run_id: int) -> str:
-    thread_name = f"inline-audit-{audit_run_id}"
+def build_inline_job_id(audit_run_id: int) -> str:
+    return f"inline-audit-{audit_run_id}"
+
+
+def start_inline_audit_run(audit_run_id: int, job_id: str | None = None) -> str:
+    thread_name = job_id or build_inline_job_id(audit_run_id)
     thread = threading.Thread(
         target=_run_inline_audit_job,
         args=(audit_run_id,),
